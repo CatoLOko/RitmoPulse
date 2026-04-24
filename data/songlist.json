@@ -1,0 +1,22 @@
+[
+  {
+    "id": "demo-pulse",
+    "name": "Neon Pulse",
+    "artist": "Project Pulse OST",
+    "bpm": 120,
+    "difficulty": 2,
+    "chartFile": "data/charts/demo-pulse.json",
+    "audioFile": "assets/songs/demo-pulse.ogg",
+    "coverArt": "assets/covers/demo-pulse.png"
+  },
+  {
+    "id": "justice-for-all",
+    "name": "...And Justice for All",
+    "artist": "Metallica",
+    "bpm": 104,
+    "difficulty": 4,
+    "chartFile": "data/charts/justice-for-all.json",
+    "audioFile": "assets/songs/justice-for-all.mp3",
+    "coverArt": "assets/covers/justice-for-all.png"
+  }
+]
