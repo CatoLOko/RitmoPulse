@@ -1,7 +1,23 @@
 {
   "song": "...And Justice for All",
   "bpm": 104,
-  "scrollSpeed": 1.2,
+  "scrollSpeed": 1.4,
+  "events": [
+    { "time": 3000, "type": "textPopup", "text": "⚖️ JUSTICE!", "color": "#E74C3C" },
+    { "time": 8000, "type": "shake", "intensity": 4, "duration": 400 },
+    { "time": 10000, "type": "flashBg", "color": "#E74C3C", "duration": 250 },
+    { "time": 16000, "type": "pulseReceptors", "duration": 4000, "interval": 577 },
+    { "time": 20000, "type": "shake", "intensity": 5, "duration": 500 },
+    { "time": 26000, "type": "speedChange", "speed": 1.6, "duration": 5000 },
+    { "time": 26000, "type": "textPopup", "text": "🔥 FASTER!", "color": "#FFD700" },
+    { "time": 30000, "type": "darkout", "duration": 5000 },
+    { "time": 35000, "type": "flashBg", "color": "#FFD700", "duration": 400 },
+    { "time": 35000, "type": "shake", "intensity": 7, "duration": 600 },
+    { "time": 42000, "type": "laneZoom", "zoom": 1.08, "duration": 5000 },
+    { "time": 45000, "type": "pulseReceptors", "duration": 8000, "interval": 577 },
+    { "time": 52000, "type": "textPopup", "text": "⚡ FINAL RIFF!", "color": "#E74C3C" },
+    { "time": 52000, "type": "flashBg", "color": "#E74C3C", "duration": 300 }
+  ],
   "notes": [
     { "time": 3000, "lane": 0, "type": "tap" },
     { "time": 3577, "lane": 1, "type": "tap" },

@@ -1,8 +1,9 @@
 /**
  * AudioSyncManager — Precise audio-visual synchronization via Web Audio API.
- * All note positions must derive from this manager's songPosition, never frame deltas.
+ * Supports dynamic scroll speed (per-song + user multiplier).
  */
 import { CONFIG } from '../config.js';
+import settingsManager from './SettingsManager.js';
 
 export default class AudioSyncManager {
     constructor(scene) {
@@ -13,8 +14,11 @@ export default class AudioSyncManager {
         this.playing = false;
         this.paused = false;
         this.pauseTime = 0;
-        this.offset = 0; // user-calibrated latency offset (ms)
+        this.offset = settingsManager.get('audioOffset') || 0;
         this.currentSound = null;
+
+        // Scroll time — can be changed dynamically by EventManager
+        this.scrollTime = CONFIG.SCROLL_TIME;
     }
 
     /**
@@ -33,6 +37,13 @@ export default class AudioSyncManager {
     }
 
     /**
+     * Set the effective scroll time based on song speed and user settings.
+     */
+    setScrollSpeed(songScrollSpeed) {
+        this.scrollTime = settingsManager.getEffectiveScrollTime(songScrollSpeed);
+    }
+
+    /**
      * Play a song by key (must be preloaded in the scene).
      */
     playSong(key) {
@@ -43,7 +54,8 @@ export default class AudioSyncManager {
             this.currentSound.destroy();
         }
 
-        this.currentSound = this.scene.sound.add(key, { volume: 0.7 });
+        const musicVol = settingsManager.get('musicVolume') * settingsManager.get('masterVolume');
+        this.currentSound = this.scene.sound.add(key, { volume: musicVol });
         this.currentSound.play();
         this.songStartTime = this.audioContext.currentTime;
         this.songDuration = this.currentSound.duration * 1000; // ms
@@ -53,7 +65,6 @@ export default class AudioSyncManager {
 
     /**
      * Get the current song position in milliseconds.
-     * This is THE authoritative time source for note positioning.
      */
     getSongPosition() {
         if (!this.playing) return 0;
@@ -82,7 +93,6 @@ export default class AudioSyncManager {
     resume() {
         if (this.playing && this.paused) {
             if (this.currentSound) this.currentSound.resume();
-            // Recalculate start time to account for pause duration
             this.songStartTime = this.audioContext.currentTime - (this.pauseTime - this.offset) / 1000;
             this.paused = false;
         }
@@ -101,11 +111,13 @@ export default class AudioSyncManager {
     /**
      * Compute the Y position for a note given its hit time.
      * Notes fall DOWNWARD: spawn at top, receptor at bottom.
+     * Uses dynamic scrollTime (affected by song speed + user settings + events).
      */
-    getNoteY(noteTime) {
+    getNoteY(noteTime, scrollTimeOverride) {
         const songPos = this.getSongPosition();
-        const timeDiff = noteTime - songPos; // positive = note is above receptor
-        const pixelsPerMs = CONFIG.RECEPTOR_Y / CONFIG.SCROLL_TIME;
+        const timeDiff = noteTime - songPos;
+        const st = scrollTimeOverride || this.scrollTime;
+        const pixelsPerMs = CONFIG.RECEPTOR_Y / st;
         return CONFIG.RECEPTOR_Y - timeDiff * pixelsPerMs;
     }
 }

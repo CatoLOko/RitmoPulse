@@ -5,6 +5,7 @@
     "artist": "Project Pulse OST",
     "bpm": 120,
     "difficulty": 2,
+    "scrollSpeed": 1.0,
     "chartFile": "data/charts/demo-pulse.json",
     "audioFile": "assets/songs/demo-pulse.ogg",
     "coverArt": "assets/covers/demo-pulse.png"
@@ -15,8 +16,42 @@
     "artist": "Metallica",
     "bpm": 104,
     "difficulty": 4,
+    "scrollSpeed": 1.4,
     "chartFile": "data/charts/justice-for-all.json",
     "audioFile": "assets/songs/justice-for-all.mp3",
     "coverArt": "assets/covers/justice-for-all.png"
+  },
+  {
+    "id": "midnight-city",
+    "name": "Midnight City",
+    "artist": "M83",
+    "bpm": 105,
+    "difficulty": 3,
+    "scrollSpeed": 1.2,
+    "chartFile": "data/charts/midnight-city.json",
+    "audioFile": "assets/songs/midnight-city.mp3",
+    "coverArt": "assets/covers/midnight-city.png"
+  },
+  {
+    "id": "thunderstruck",
+    "name": "Thunderstruck",
+    "artist": "AC/DC",
+    "bpm": 134,
+    "difficulty": 5,
+    "scrollSpeed": 1.8,
+    "chartFile": "data/charts/thunderstruck.json",
+    "audioFile": "assets/songs/thunderstruck.mp3",
+    "coverArt": "assets/covers/thunderstruck.png"
+  },
+  {
+    "id": "take-on-me",
+    "name": "Take On Me",
+    "artist": "A-ha",
+    "bpm": 168,
+    "difficulty": 3,
+    "scrollSpeed": 1.3,
+    "chartFile": "data/charts/take-on-me.json",
+    "audioFile": "assets/songs/take-on-me.mp3",
+    "coverArt": "assets/covers/take-on-me.png"
   }
 ]

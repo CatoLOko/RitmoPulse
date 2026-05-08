@@ -169,11 +169,16 @@ export default class MenuScene extends Phaser.Scene {
                 });
                 break;
             case 1: // OPÇÕES
-                // TODO: Options scene
-                this.showToast('Em breve!');
+                this.cameras.main.fadeOut(300, 0, 0, 0);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('Options');
+                });
                 break;
             case 2: // CRÉDITOS
-                this.showToast('Project Pulse — Jogo de Ritmo');
+                this.cameras.main.fadeOut(300, 0, 0, 0);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('Credits');
+                });
                 break;
         }
     }

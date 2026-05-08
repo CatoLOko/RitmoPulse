@@ -2,6 +2,15 @@
   "song": "Neon Pulse",
   "bpm": 120,
   "scrollSpeed": 1.0,
+  "events": [
+    { "time": 4000, "type": "pulseReceptors", "duration": 4000, "interval": 500 },
+    { "time": 12000, "type": "flashBg", "color": "#9B59B6", "duration": 300 },
+    { "time": 15000, "type": "colorShift", "color": "#00D4FF", "duration": 3000 },
+    { "time": 20000, "type": "textPopup", "text": "🎵 NICE!", "color": "#2ECC71" },
+    { "time": 26000, "type": "pulseReceptors", "duration": 6000, "interval": 500 },
+    { "time": 33000, "type": "flashBg", "color": "#FFD700", "duration": 250 },
+    { "time": 38000, "type": "textPopup", "text": "🔥 FINALE!", "color": "#E74C3C" }
+  ],
   "notes": [
     { "time": 2000, "lane": 2, "type": "tap" },
     { "time": 2500, "lane": 1, "type": "tap" },

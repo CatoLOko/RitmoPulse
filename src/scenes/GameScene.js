@@ -1,6 +1,7 @@
 /**
  * GameScene — Core gameplay: note highway, input detection, scoring, and HUD.
  * Notes scroll DOWNWARD (Guitar Hero style).
+ * Integrates EventManager for dynamic level effects and per-song scroll speed.
  */
 import { CONFIG } from '../config.js';
 import AudioSyncManager from '../systems/AudioSyncManager.js';
@@ -8,6 +9,8 @@ import InputManager from '../systems/InputManager.js';
 import NoteManager from '../systems/NoteManager.js';
 import ScoreManager from '../systems/ScoreManager.js';
 import ParticleManager from '../systems/ParticleManager.js';
+import EventManager from '../systems/EventManager.js';
+import settingsManager from '../systems/SettingsManager.js';
 import HUD from '../ui/HUD.js';
 import JudgmentPopup from '../ui/JudgmentPopup.js';
 
@@ -35,7 +38,7 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.fadeIn(300);
 
         // Background
-        this.add.image(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2, 'bg_game');
+        this.bgImage = this.add.image(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2, 'bg_game');
 
         // Draw the note highway
         this.createHighway();
@@ -49,18 +52,41 @@ export default class GameScene extends Phaser.Scene {
         this.scoreMgr = new ScoreManager();
         this.noteMgr = new NoteManager(this, this.audioSync);
         this.particleMgr = new ParticleManager(this);
+        this.eventMgr = new EventManager(this);
         this.hud = new HUD(this);
         this.judgmentPopup = new JudgmentPopup(this);
+
+        // Per-song scroll speed — higher difficulty = faster
+        const songScrollSpeed = this.songData ? (this.songData.scrollSpeed || 1.0) : 1.0;
+        this.audioSync.setScrollSpeed(songScrollSpeed);
+        this.currentScrollTime = this.audioSync.scrollTime;
 
         // Set song info
         if (this.songData) {
             this.hud.setSongInfo(this.songData.name, this.songData.artist);
         }
 
-        // Load chart
+        // Load chart and events
         const chartData = this.cache.json.get('current_chart');
         if (chartData) {
             this.noteMgr.loadChart(chartData);
+            this.eventMgr.loadEvents(chartData);
+        }
+
+        // Give EventManager access to scene objects
+        this.eventMgr.setTargets({
+            highway: this.highwayContainer,
+            background: this.bgImage,
+            receptors: this.receptors,
+            camera: this.cameras.main,
+        });
+
+        // FPS counter
+        this.fpsText = null;
+        if (settingsManager.get('showFPS')) {
+            this.fpsText = this.add.text(10, CONFIG.HEIGHT - 20, '', {
+                fontFamily: 'Inter', fontSize: '12px', color: '#555566',
+            }).setDepth(100);
         }
 
         // Game state
@@ -83,11 +109,13 @@ export default class GameScene extends Phaser.Scene {
         const hwX = CONFIG.HIGHWAY_X;
         const totalWidth = CONFIG.LANE_COUNT * CONFIG.LANE_WIDTH + (CONFIG.LANE_COUNT - 1) * CONFIG.LANE_GAP;
 
+        this.highwayContainer = this.add.container(0, 0).setDepth(1);
+
         // Highway background
         const hwBg = this.add.graphics();
         hwBg.fillStyle(0x0a0a18, 0.7);
         hwBg.fillRoundedRect(hwX - 10, 0, totalWidth + 20, CONFIG.HEIGHT, 4);
-        hwBg.setDepth(1);
+        this.highwayContainer.add(hwBg);
 
         // Lane dividers
         const dividers = this.add.graphics();
@@ -96,17 +124,17 @@ export default class GameScene extends Phaser.Scene {
             const x = hwX + i * (CONFIG.LANE_WIDTH + CONFIG.LANE_GAP) - CONFIG.LANE_GAP / 2;
             dividers.lineBetween(x, 0, x, CONFIG.HEIGHT);
         }
-        dividers.setDepth(2);
+        this.highwayContainer.add(dividers);
 
-        // Receptor line (horizontal glow line at receptor Y)
+        // Receptor line
         const receptorLine = this.add.graphics();
         receptorLine.lineStyle(2, 0x9B59B6, 0.5);
         receptorLine.lineBetween(hwX - 10, CONFIG.RECEPTOR_Y, hwX + totalWidth + 10, CONFIG.RECEPTOR_Y);
         receptorLine.setDepth(3);
 
         // Side glow edges
-        const leftGlow = this.add.rectangle(hwX - 10, CONFIG.HEIGHT / 2, 4, CONFIG.HEIGHT, 0x9B59B6, 0.15).setDepth(2);
-        const rightGlow = this.add.rectangle(hwX + totalWidth + 10, CONFIG.HEIGHT / 2, 4, CONFIG.HEIGHT, 0x9B59B6, 0.15).setDepth(2);
+        this.add.rectangle(hwX - 10, CONFIG.HEIGHT / 2, 4, CONFIG.HEIGHT, 0x9B59B6, 0.15).setDepth(2);
+        this.add.rectangle(hwX + totalWidth + 10, CONFIG.HEIGHT / 2, 4, CONFIG.HEIGHT, 0x9B59B6, 0.15).setDepth(2);
     }
 
     /**
@@ -114,7 +142,7 @@ export default class GameScene extends Phaser.Scene {
      */
     createReceptors() {
         this.receptors = [];
-        const angles = [270, 180, 0, 90]; // left, down, up, right
+        const angles = [270, 180, 0, 90];
 
         for (let i = 0; i < CONFIG.LANE_COUNT; i++) {
             const x = CONFIG.LANE_CENTERS[i];
@@ -178,15 +206,14 @@ export default class GameScene extends Phaser.Scene {
     startSong() {
         this.gameStarted = true;
 
-        // Check if audio was loaded
         if (this.cache.audio.exists('current_song')) {
             this.audioSync.playSong('current_song');
         } else {
-            // No audio file — run in silent/demo mode with a timer
+            // No audio file — run in silent/demo mode
             this.audioSync.init();
             this.audioSync.songStartTime = this.audioSync.audioContext.currentTime;
             this.audioSync.playing = true;
-            this.audioSync.songDuration = 180000; // 3 min default
+            this.audioSync.songDuration = 180000;
         }
     }
 
@@ -206,8 +233,14 @@ export default class GameScene extends Phaser.Scene {
 
         const songPos = this.audioSync.getSongPosition();
 
+        // Update dynamic scroll time (may be changed by EventManager)
+        this.audioSync.scrollTime = this.currentScrollTime;
+
         // Update note positions
         this.noteMgr.update(songPos);
+
+        // Update chart events
+        this.eventMgr.update(songPos);
 
         // Check for missed notes
         const missedNotes = this.noteMgr.getMissedNotes(songPos);
@@ -248,6 +281,11 @@ export default class GameScene extends Phaser.Scene {
         // Update HUD
         this.hud.update(this.scoreMgr, songPos, this.audioSync.songDuration);
 
+        // FPS counter
+        if (this.fpsText) {
+            this.fpsText.setText(`FPS: ${Math.round(this.game.loop.actualFps)}`);
+        }
+
         // Check for game over (health depleted)
         if (this.scoreMgr.isDead()) {
             this.endGame(false);
@@ -255,7 +293,7 @@ export default class GameScene extends Phaser.Scene {
 
         // Check for song completion
         if (this.audioSync.isFinished() || this.noteMgr.isChartComplete(songPos)) {
-            if (songPos > 2000) { // ensure we're past the start
+            if (songPos > 2000) {
                 this.endGame(true);
             }
         }
@@ -267,15 +305,13 @@ export default class GameScene extends Phaser.Scene {
     handleLanePress(lane, songPos) {
         const note = this.noteMgr.getHittableNote(lane, songPos);
 
-        if (!note) return; // no note to hit — ghost tap (no penalty)
+        if (!note) return;
 
         const timeDiff = note.time - songPos;
         const { judgment } = this.scoreMgr.evaluate(timeDiff);
 
-        // Hit the note
         this.noteMgr.hitNote(note);
 
-        // Visual feedback
         this.judgmentPopup.show(lane, judgment);
         this.particleMgr.emitHit(lane, judgment);
 
@@ -316,23 +352,17 @@ export default class GameScene extends Phaser.Scene {
         this.pauseOverlay.add(bg);
 
         const title = this.add.text(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2 - 60, 'PAUSED', {
-            fontFamily: 'Orbitron',
-            fontSize: '48px',
-            color: '#9B59B6',
+            fontFamily: 'Orbitron', fontSize: '48px', color: '#9B59B6',
         }).setOrigin(0.5);
         this.pauseOverlay.add(title);
 
         const resume = this.add.text(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2 + 10, 'Press ESC to resume', {
-            fontFamily: 'Inter',
-            fontSize: '18px',
-            color: '#888899',
+            fontFamily: 'Inter', fontSize: '18px', color: '#888899',
         }).setOrigin(0.5);
         this.pauseOverlay.add(resume);
 
         const quit = this.add.text(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2 + 50, 'Press Q to quit', {
-            fontFamily: 'Inter',
-            fontSize: '16px',
-            color: '#555566',
+            fontFamily: 'Inter', fontSize: '16px', color: '#555566',
         }).setOrigin(0.5);
         this.pauseOverlay.add(quit);
 
@@ -380,6 +410,7 @@ export default class GameScene extends Phaser.Scene {
     shutdown() {
         if (this.audioSync) this.audioSync.stop();
         if (this.noteMgr) this.noteMgr.destroy();
+        if (this.eventMgr) this.eventMgr.destroy();
         if (this.hud) this.hud.destroy();
     }
 }

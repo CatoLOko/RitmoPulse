@@ -1,8 +1,9 @@
 /**
- * InputManager — Keyboard input handling with key-repeat filtering.
- * Maps arrow keys and WASD to 4 lanes.
+ * InputManager — Keyboard input handling with dynamic key bindings.
+ * Reads bindings from SettingsManager instead of hardcoding.
  */
 import { CONFIG } from '../config.js';
+import settingsManager from './SettingsManager.js';
 
 export default class InputManager {
     constructor(scene) {
@@ -17,19 +18,32 @@ export default class InputManager {
         // Edge triggers: was the key JUST released this frame?
         this.justReleased = [false, false, false, false];
 
-        // Phaser key objects
-        this.keys = {
-            left:  [scene.input.keyboard.addKey('LEFT'),  scene.input.keyboard.addKey('A')],
-            down:  [scene.input.keyboard.addKey('DOWN'),  scene.input.keyboard.addKey('S')],
-            up:    [scene.input.keyboard.addKey('UP'),    scene.input.keyboard.addKey('W')],
-            right: [scene.input.keyboard.addKey('RIGHT'), scene.input.keyboard.addKey('D')],
-        };
-
-        this.laneKeys = [this.keys.left, this.keys.down, this.keys.up, this.keys.right];
+        // Build key bindings from settings
+        this.laneKeys = [];
+        this.buildKeyBindings();
 
         // ESC for pause
         this.escKey = scene.input.keyboard.addKey('ESC');
         this.enterKey = scene.input.keyboard.addKey('ENTER');
+    }
+
+    /**
+     * Build Phaser key objects from SettingsManager bindings.
+     */
+    buildKeyBindings() {
+        this.laneKeys = [];
+        for (let i = 0; i < CONFIG.LANE_COUNT; i++) {
+            const primary = settingsManager.getKey(i);
+            const alt = settingsManager.getAltKey(i);
+            const keys = [
+                this.scene.input.keyboard.addKey(primary),
+            ];
+            // Only add alt key if it's different from primary
+            if (alt && alt !== primary) {
+                keys.push(this.scene.input.keyboard.addKey(alt));
+            }
+            this.laneKeys.push(keys);
+        }
     }
 
     /**

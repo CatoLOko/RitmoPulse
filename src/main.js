@@ -5,6 +5,8 @@ import { CONFIG } from './config.js';
 import BootScene from './scenes/BootScene.js';
 import SplashScene from './scenes/SplashScene.js';
 import MenuScene from './scenes/MenuScene.js';
+import OptionsScene from './scenes/OptionsScene.js';
+import CreditsScene from './scenes/CreditsScene.js';
 import SongSelectScene from './scenes/SongSelectScene.js';
 import GameScene from './scenes/GameScene.js';
 import ResultScene from './scenes/ResultScene.js';
@@ -20,7 +22,7 @@ const config = {
         default: 'arcade',
         arcade: { debug: false }
     },
-    scene: [BootScene, SplashScene, MenuScene, SongSelectScene, GameScene, ResultScene, GameOverScene],
+    scene: [BootScene, SplashScene, MenuScene, OptionsScene, CreditsScene, SongSelectScene, GameScene, ResultScene, GameOverScene],
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
