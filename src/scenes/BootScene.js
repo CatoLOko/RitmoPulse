@@ -16,12 +16,47 @@ export default class BootScene extends Phaser.Scene {
 
     create() {
         this.generateArrowTextures();
+        this.generateBombTexture();
         this.generateReceptorTextures();
         this.generateSustainTextures();
         this.generateParticleTexture();
         this.generateBackgrounds();
         this.generateUITextures();
         this.scene.start('Splash');
+    }
+
+    /**
+     * Generate bomb note texture — dark circle with X, signals instant danger.
+     */
+    generateBombTexture() {
+        const size = CONFIG.NOTE_SIZE + 8;
+        const center = size / 2;
+        const g = this.make.graphics({ add: false });
+
+        // Outer dark glow
+        g.fillStyle(0x330000, 0.6);
+        g.fillCircle(center, center, size / 2);
+
+        // Main body — dark red/black
+        g.fillStyle(0x1a0000, 1);
+        g.fillCircle(center, center, size / 2 - 4);
+
+        // Danger border
+        g.lineStyle(3, 0xff0000, 0.8);
+        g.strokeCircle(center, center, size / 2 - 4);
+
+        // X mark
+        const xSize = size / 4;
+        g.lineStyle(4, 0xff0000, 1);
+        g.lineBetween(center - xSize, center - xSize, center + xSize, center + xSize);
+        g.lineBetween(center + xSize, center - xSize, center - xSize, center + xSize);
+
+        // Inner glow
+        g.fillStyle(0xff0000, 0.15);
+        g.fillCircle(center, center, size / 4);
+
+        g.generateTexture('note_bomb', size, size);
+        g.destroy();
     }
 
     /** Draw an UP arrow polygon on a graphics object */

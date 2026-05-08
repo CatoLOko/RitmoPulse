@@ -4,16 +4,22 @@
   "scrollSpeed": 1.2,
   "events": [
     { "time": 5000, "type": "textPopup", "text": "🌃 MIDNIGHT", "color": "#9B59B6" },
+    { "time": 8000, "type": "flashBg", "color": "#9B59B6", "duration": 200 },
     { "time": 10000, "type": "pulseReceptors", "duration": 8000, "interval": 571 },
+    { "time": 15000, "type": "wobble", "duration": 5000, "intensity": 25 },
     { "time": 18000, "type": "flashBg", "color": "#00D4FF", "duration": 300 },
     { "time": 22000, "type": "colorShift", "color": "#9B59B6", "duration": 4000 },
+    { "time": 26000, "type": "flashBg", "color": "#2ECC71", "duration": 200 },
+    { "time": 28000, "type": "mirror", "duration": 5000 },
     { "time": 30000, "type": "laneZoom", "zoom": 1.08, "duration": 6000 },
+    { "time": 34000, "type": "shake", "intensity": 4, "duration": 300 },
     { "time": 36000, "type": "flashBg", "color": "#2ECC71", "duration": 250 },
-    { "time": 40000, "type": "darkout", "duration": 6000 },
-    { "time": 48000, "type": "textPopup", "text": "✨ CHORUS!", "color": "#00D4FF" },
-    { "time": 48000, "type": "pulseReceptors", "duration": 10000, "interval": 571 },
-    { "time": 55000, "type": "flashBg", "color": "#FFD700", "duration": 200 },
-    { "time": 60000, "type": "speedChange", "speed": 1.4, "duration": 5000 }
+    { "time": 38000, "type": "wobble", "duration": 4000, "intensity": 35 },
+    { "time": 40000, "type": "darkout", "duration": 4000 },
+    { "time": 43000, "type": "flashBg", "color": "#FFD700", "duration": 250 },
+    { "time": 44000, "type": "textPopup", "text": "✨ CHORUS!", "color": "#00D4FF" },
+    { "time": 44000, "type": "pulseReceptors", "duration": 8000, "interval": 571 },
+    { "time": 48000, "type": "speedChange", "speed": 1.4, "duration": 5000 }
   ],
   "notes": [
     { "time": 3000, "lane": 2, "type": "tap" },
@@ -29,6 +35,8 @@
     { "time": 8143, "lane": 2, "type": "tap" },
     { "time": 8429, "lane": 1, "type": "tap" },
     { "time": 8714, "lane": 0, "type": "tap" },
+
+    { "time": 9500, "lane": 1, "type": "bomb" },
 
     { "time": 10000, "lane": 1, "type": "sustain", "duration": 1143 },
     { "time": 11500, "lane": 2, "type": "sustain", "duration": 1143 },
@@ -51,6 +59,8 @@
 
     { "time": 19000, "lane": 0, "type": "sustain", "duration": 1500 },
     { "time": 19000, "lane": 3, "type": "sustain", "duration": 1500 },
+
+    { "time": 20800, "lane": 2, "type": "bomb" },
 
     { "time": 21500, "lane": 1, "type": "tap" },
     { "time": 21786, "lane": 2, "type": "tap" },

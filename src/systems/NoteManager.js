@@ -1,6 +1,7 @@
 /**
  * NoteManager — Loads chart data, spawns/positions/recycles note sprites.
  * Notes scroll DOWNWARD. Position is always derived from AudioSyncManager.
+ * Supports bomb notes and visual modifiers (wobble, mirror).
  */
 import { CONFIG } from '../config.js';
 
@@ -20,8 +21,18 @@ export default class NoteManager {
         this.noteGroup = scene.add.group();
         this.sustainGroup = scene.add.group();
 
-        // Pixels per millisecond
+        // Pixels per millisecond (base, may change with dynamic scroll)
         this.pxPerMs = CONFIG.RECEPTOR_Y / CONFIG.SCROLL_TIME;
+
+        // Reference to EventManager for wobble/mirror effects
+        this.eventMgr = null;
+    }
+
+    /**
+     * Set reference to EventManager for visual modifiers.
+     */
+    setEventManager(eventMgr) {
+        this.eventMgr = eventMgr;
     }
 
     /**
@@ -32,7 +43,7 @@ export default class NoteManager {
             .map(n => ({
                 time: n.time,
                 lane: n.lane,
-                type: n.type || 'tap',
+                type: n.type || 'tap',  // 'tap', 'sustain', or 'bomb'
                 duration: n.duration || 0,
                 hit: false,
                 missed: false,
@@ -52,8 +63,12 @@ export default class NoteManager {
      * Called every frame from GameScene.update().
      */
     update(songPosition) {
+        // Update pxPerMs based on current scroll time
+        const currentScrollTime = this.audioSync.scrollTime || CONFIG.SCROLL_TIME;
+        this.pxPerMs = CONFIG.RECEPTOR_Y / currentScrollTime;
+
         // Spawn notes that are approaching the visible area
-        const spawnAheadMs = CONFIG.SCROLL_TIME + 200; // spawn a bit early
+        const spawnAheadMs = currentScrollTime + 200;
 
         while (this.nextNoteIndex < this.notes.length) {
             const noteData = this.notes[this.nextNoteIndex];
@@ -71,9 +86,35 @@ export default class NoteManager {
             if (noteData.sprite && !noteData.sprite.destroyed) {
                 noteData.sprite.y = y;
 
-                // Rotation for lane direction
-                const angle = [270, 180, 0, 90][noteData.lane];
-                noteData.sprite.angle = angle;
+                // Apply wobble + mirror effects
+                const effectiveLane = this.getEffectiveLane(noteData.lane);
+                let x = CONFIG.LANE_CENTERS[effectiveLane];
+
+                if (this.eventMgr) {
+                    x += this.eventMgr.getWobbleOffset(songPosition, noteData.time);
+                }
+
+                noteData.sprite.x = x;
+
+                // Rotation for lane direction (bomb notes don't rotate)
+                if (noteData.type !== 'bomb') {
+                    const angle = [270, 180, 0, 90][effectiveLane];
+                    noteData.sprite.angle = angle;
+                }
+
+                // Bomb note pulsing animation
+                if (noteData.type === 'bomb' && !noteData._pulsing) {
+                    noteData._pulsing = true;
+                    this.scene.tweens.add({
+                        targets: noteData.sprite,
+                        scaleX: 1.15,
+                        scaleY: 1.15,
+                        duration: 300,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut',
+                    });
+                }
             }
 
             // Update sustain body rendering
@@ -85,7 +126,6 @@ export default class NoteManager {
             if (y > CONFIG.HEIGHT + 100) {
                 if (!noteData.hit && !noteData.missed) {
                     noteData.missed = true;
-                    // The GameScene will handle scoring the miss
                 }
                 this.recycleNote(noteData);
                 this.activeNotes.splice(i, 1);
@@ -94,17 +134,35 @@ export default class NoteManager {
     }
 
     /**
+     * Get the effective lane, considering mirror effect.
+     */
+    getEffectiveLane(lane) {
+        if (this.eventMgr && this.eventMgr.mirrorActive) {
+            return CONFIG.LANE_COUNT - 1 - lane;
+        }
+        return lane;
+    }
+
+    /**
      * Spawn a note sprite.
      */
     spawnNote(noteData) {
-        const x = CONFIG.LANE_CENTERS[noteData.lane];
+        const effectiveLane = this.getEffectiveLane(noteData.lane);
+        const x = CONFIG.LANE_CENTERS[effectiveLane];
         const y = this.audioSync.getNoteY(noteData.time);
-        const angle = [270, 180, 0, 90][noteData.lane];
 
-        // Create note sprite
-        const sprite = this.scene.add.image(x, y, `note_${noteData.lane}`);
-        sprite.setAngle(angle);
-        sprite.setDepth(10);
+        let sprite;
+        if (noteData.type === 'bomb') {
+            // Bomb note — uses special dark red texture
+            sprite = this.scene.add.image(x, y, 'note_bomb');
+            sprite.setDepth(11); // slightly above normal notes
+        } else {
+            const angle = [270, 180, 0, 90][effectiveLane];
+            sprite = this.scene.add.image(x, y, `note_${effectiveLane}`);
+            sprite.setAngle(angle);
+            sprite.setDepth(10);
+        }
+
         noteData.sprite = sprite;
         this.noteGroup.add(sprite);
 
@@ -120,21 +178,18 @@ export default class NoteManager {
      * Create sustain note visual (body + cap extending ABOVE the note head).
      */
     createSustainVisual(noteData) {
-        const x = CONFIG.LANE_CENTERS[noteData.lane];
-        const lane = noteData.lane;
+        const effectiveLane = this.getEffectiveLane(noteData.lane);
+        const x = CONFIG.LANE_CENTERS[effectiveLane];
         const totalHeight = noteData.duration * this.pxPerMs;
 
-        // Container for sustain parts
         const container = this.scene.add.container(x, 0);
         container.setDepth(5);
 
-        // Body — a tiled sprite stretching upward from the note head
-        const body = this.scene.add.tileSprite(0, 0, CONFIG.SUSTAIN_WIDTH, totalHeight, `sustain_body_${lane}`);
-        body.setOrigin(0.5, 1); // anchor at bottom
+        const body = this.scene.add.tileSprite(0, 0, CONFIG.SUSTAIN_WIDTH, totalHeight, `sustain_body_${effectiveLane}`);
+        body.setOrigin(0.5, 1);
         container.add(body);
 
-        // Cap at the top
-        const cap = this.scene.add.image(0, -totalHeight, `sustain_cap_${lane}`);
+        const cap = this.scene.add.image(0, -totalHeight, `sustain_cap_${effectiveLane}`);
         cap.setOrigin(0.5, 1);
         container.add(cap);
 
@@ -150,10 +205,14 @@ export default class NoteManager {
         if (!ss || !ss.container || ss.container.destroyed) return;
 
         const noteY = this.audioSync.getNoteY(noteData.time);
-        const x = CONFIG.LANE_CENTERS[noteData.lane];
+        const effectiveLane = this.getEffectiveLane(noteData.lane);
+        let x = CONFIG.LANE_CENTERS[effectiveLane];
+
+        if (this.eventMgr) {
+            x += this.eventMgr.getWobbleOffset(songPosition, noteData.time);
+        }
 
         if (noteData.holdActive) {
-            // While being held, the bottom of the sustain stays at receptor
             const endTime = noteData.time + noteData.duration;
             const remainingMs = Math.max(0, endTime - songPosition);
             const remainingHeight = remainingMs * this.pxPerMs;
@@ -167,7 +226,6 @@ export default class NoteManager {
                 noteData.holdActive = false;
             }
         } else {
-            // Free-falling: container bottom = note head position
             ss.container.x = x;
             ss.container.y = noteY;
         }
@@ -182,6 +240,7 @@ export default class NoteManager {
         let closestDiff = Infinity;
 
         for (const noteData of this.activeNotes) {
+            // Check against original lane (input lane)
             if (noteData.lane !== lane || noteData.hit || noteData.missed) continue;
 
             const diff = Math.abs(noteData.time - songPosition);
@@ -195,23 +254,36 @@ export default class NoteManager {
     }
 
     /**
+     * Find bomb note in a given lane that's hittable.
+     */
+    getBombNote(lane, songPosition) {
+        for (const noteData of this.activeNotes) {
+            if (noteData.type !== 'bomb') continue;
+            if (noteData.lane !== lane || noteData.hit || noteData.missed) continue;
+
+            const diff = Math.abs(noteData.time - songPosition);
+            if (diff <= CONFIG.JUDGE_MISS) {
+                return noteData;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Mark a note as hit and handle visual feedback.
      */
     hitNote(noteData) {
         noteData.hit = true;
 
         if (noteData.type === 'sustain') {
-            // Start hold tracking
             noteData.holdActive = true;
             noteData.lastTickTime = this.audioSync.getSongPosition();
             this.activeHolds[noteData.lane] = noteData;
 
-            // Hide the note head but keep sustain visible
             if (noteData.sprite) {
                 noteData.sprite.setVisible(false);
             }
         } else {
-            // Tap note: remove sprite
             this.destroyNoteSprite(noteData);
         }
     }
@@ -230,21 +302,18 @@ export default class NoteManager {
             const endTime = holdNote.time + holdNote.duration;
 
             if (!isLaneHeld(lane)) {
-                // Player released early — end the hold
                 holdNote.holdActive = false;
                 this.activeHolds[lane] = null;
                 this.destroySustainVisual(holdNote);
                 continue;
             }
 
-            // Award tick points
             if (songPosition - holdNote.lastTickTime >= CONFIG.SUSTAIN_TICK_INTERVAL) {
                 const ticksEarned = Math.floor((songPosition - holdNote.lastTickTime) / CONFIG.SUSTAIN_TICK_INTERVAL);
                 ticks += ticksEarned;
                 holdNote.lastTickTime += ticksEarned * CONFIG.SUSTAIN_TICK_INTERVAL;
             }
 
-            // Check if hold is complete
             if (songPosition >= endTime) {
                 holdNote.holdActive = false;
                 this.activeHolds[lane] = null;
@@ -257,6 +326,7 @@ export default class NoteManager {
 
     /**
      * Get notes that were missed (passed the window without being hit).
+     * Bomb notes that are missed are GOOD (player avoided them).
      */
     getMissedNotes(songPosition) {
         const missed = [];
@@ -265,7 +335,10 @@ export default class NoteManager {
                 const diff = songPosition - noteData.time;
                 if (diff > CONFIG.JUDGE_MISS) {
                     noteData.missed = true;
-                    missed.push(noteData);
+                    // Bomb notes that pass without being pressed = good!
+                    if (noteData.type !== 'bomb') {
+                        missed.push(noteData);
+                    }
                 }
             }
         }
@@ -303,10 +376,10 @@ export default class NoteManager {
     }
 
     /**
-     * Get total note count in the chart.
+     * Get total note count in the chart (excluding bombs).
      */
     getTotalNoteCount() {
-        return this.notes.length;
+        return this.notes.filter(n => n.type !== 'bomb').length;
     }
 
     destroy() {

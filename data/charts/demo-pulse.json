@@ -4,9 +4,11 @@
   "scrollSpeed": 1.0,
   "events": [
     { "time": 4000, "type": "pulseReceptors", "duration": 4000, "interval": 500 },
+    { "time": 10000, "type": "wobble", "duration": 4000, "intensity": 20 },
     { "time": 12000, "type": "flashBg", "color": "#9B59B6", "duration": 300 },
     { "time": 15000, "type": "colorShift", "color": "#00D4FF", "duration": 3000 },
     { "time": 20000, "type": "textPopup", "text": "🎵 NICE!", "color": "#2ECC71" },
+    { "time": 22000, "type": "mirror", "duration": 4000 },
     { "time": 26000, "type": "pulseReceptors", "duration": 6000, "interval": 500 },
     { "time": 33000, "type": "flashBg", "color": "#FFD700", "duration": 250 },
     { "time": 38000, "type": "textPopup", "text": "🔥 FINALE!", "color": "#E74C3C" }
@@ -18,10 +20,10 @@
     { "time": 3500, "lane": 3, "type": "tap" },
 
     { "time": 4500, "lane": 0, "type": "tap" },
-    { "time": 4750, "lane": 1, "type": "tap" },
+    { "time": 4750, "lane": 1, "type": "bomb" },
     { "time": 5000, "lane": 2, "type": "tap" },
     { "time": 5250, "lane": 3, "type": "tap" },
-    { "time": 5500, "lane": 2, "type": "tap" },
+    { "time": 5500, "lane": 2, "type": "bomb" },
     { "time": 5750, "lane": 1, "type": "tap" },
     { "time": 6000, "lane": 0, "type": "tap" },
 
@@ -44,8 +46,8 @@
     { "time": 15250, "lane": 1, "type": "tap" },
     { "time": 15500, "lane": 0, "type": "tap" },
     { "time": 15500, "lane": 3, "type": "tap" },
-    { "time": 16000, "lane": 1, "type": "tap" },
-    { "time": 16000, "lane": 2, "type": "tap" },
+    { "time": 16000, "lane": 1, "type": "bomb" },
+    { "time": 16000, "lane": 2, "type": "bomb" },
     { "time": 16500, "lane": 0, "type": "tap" },
     { "time": 16750, "lane": 1, "type": "tap" },
     { "time": 17000, "lane": 2, "type": "tap" },
