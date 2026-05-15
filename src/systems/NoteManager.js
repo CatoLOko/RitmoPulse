@@ -91,10 +91,6 @@ export default class NoteManager {
                 const effectiveLane = this.getEffectiveLane(noteData.lane);
                 let x = CONFIG.LANE_CENTERS[effectiveLane];
 
-                if (this.eventMgr) {
-                    x += this.eventMgr.getWobbleOffset(songPosition, noteData.time);
-                }
-
                 noteData.sprite.x = x;
 
                 // Rotation for lane direction (bomb notes don't rotate)
@@ -105,26 +101,12 @@ export default class NoteManager {
 
                 // Ghost notes fading effect
                 const ghostEnabled = settingsManager.get('ghostNotes');
-                if (ghostEnabled && noteData.type !== 'bomb') {
+                if (ghostEnabled) {
                     const distance = Math.max(0, CONFIG.RECEPTOR_Y - y);
                     // Fade out completely when 150px away from receptor
                     noteData.sprite.alpha = Phaser.Math.Clamp((distance - 150) / 200, 0, 1);
                 } else {
                     noteData.sprite.alpha = 1;
-                }
-
-                // Bomb note pulsing animation
-                if (noteData.type === 'bomb' && !noteData._pulsing) {
-                    noteData._pulsing = true;
-                    this.scene.tweens.add({
-                        targets: noteData.sprite,
-                        scaleX: 1.15,
-                        scaleY: 1.15,
-                        duration: 300,
-                        yoyo: true,
-                        repeat: -1,
-                        ease: 'Sine.easeInOut',
-                    });
                 }
             }
 
@@ -166,16 +148,10 @@ export default class NoteManager {
         const y = this.audioSync.getNoteY(noteData.time);
 
         let sprite;
-        if (noteData.type === 'bomb') {
-            // Bomb note — uses special dark red texture
-            sprite = this.scene.add.image(x, y, 'note_bomb');
-            sprite.setDepth(11); // slightly above normal notes
-        } else {
-            const angle = [270, 180, 0, 90][effectiveLane];
-            sprite = this.scene.add.image(x, y, `note_${effectiveLane}`);
-            sprite.setAngle(angle);
-            sprite.setDepth(10);
-        }
+        const angle = [270, 180, 0, 90][effectiveLane];
+        sprite = this.scene.add.image(x, y, `note_${effectiveLane}`);
+        sprite.setAngle(angle);
+        sprite.setDepth(10);
 
         noteData.sprite = sprite;
         this.noteGroup.add(sprite);
@@ -222,10 +198,6 @@ export default class NoteManager {
         const effectiveLane = this.getEffectiveLane(noteData.lane);
         let x = CONFIG.LANE_CENTERS[effectiveLane];
 
-        if (this.eventMgr) {
-            x += this.eventMgr.getWobbleOffset(songPosition, noteData.time);
-        }
-
         if (noteData.holdActive) {
             const endTime = noteData.time + noteData.duration;
             const remainingMs = Math.max(0, endTime - songPosition);
@@ -267,22 +239,7 @@ export default class NoteManager {
         return closest;
     }
 
-    /**
-     * Find bomb note in a given lane that's hittable.
-     */
-    getBombNote(lane, songPosition) {
-        for (const noteData of this.activeNotes) {
-            if (noteData.type !== 'bomb') continue;
-            const effectiveLane = this.getEffectiveLane(noteData.lane);
-            if (effectiveLane !== lane || noteData.hit || noteData.missed) continue;
 
-            const diff = Math.abs(noteData.time - songPosition);
-            if (diff <= CONFIG.JUDGE_MISS) {
-                return noteData;
-            }
-        }
-        return null;
-    }
 
     /**
      * Mark a note as hit and handle visual feedback.
@@ -350,10 +307,7 @@ export default class NoteManager {
                 const diff = songPosition - noteData.time;
                 if (diff > CONFIG.JUDGE_MISS) {
                     noteData.missed = true;
-                    // Bomb notes that pass without being pressed = good!
-                    if (noteData.type !== 'bomb') {
-                        missed.push(noteData);
-                    }
+                    missed.push(noteData);
                 }
             }
         }
@@ -394,7 +348,7 @@ export default class NoteManager {
      * Get total note count in the chart (excluding bombs).
      */
     getTotalNoteCount() {
-        return this.notes.filter(n => n.type !== 'bomb').length;
+        return this.notes.length;
     }
 
     destroy() {

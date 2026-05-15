@@ -20,8 +20,6 @@ export default class EventManager {
         this.enabled = settingsManager.get('backgroundEffects');
 
         // Active modifiers
-        this.wobbleActive = false;
-        this.wobbleIntensity = 0;
         this.mirrorActive = false;
     }
 
@@ -34,7 +32,6 @@ export default class EventManager {
             .sort((a, b) => a.time - b.time);
         this.nextEventIndex = 0;
         this.activeEffects = [];
-        this.wobbleActive = false;
         this.mirrorActive = false;
     }
 
@@ -103,9 +100,6 @@ export default class EventManager {
                 break;
             case 'pulseReceptors':
                 this.doPulseReceptors(evt);
-                break;
-            case 'wobble':
-                this.doWobble(evt);
                 break;
             case 'mirror':
                 this.doMirror(evt);
@@ -317,28 +311,7 @@ export default class EventManager {
         });
     }
 
-    /**
-     * WOBBLE — Notes sway left/right on screen ("drunk" effect).
-     * The NoteManager reads wobbleActive/wobbleIntensity to offset note X positions.
-     */
-    doWobble(evt) {
-        const duration = evt.duration || 5000;
-        const intensity = evt.intensity || 40;
 
-        this.wobbleActive = true;
-        this.wobbleIntensity = intensity;
-
-        // Show warning text
-        this.doTextPopup({ text: '🌀 WOBBLE!', color: '#FF69B4' });
-
-        this.activeEffects.push({
-            endTime: this.scene.audioSync.getSongPosition() + duration,
-            cleanup: () => {
-                this.wobbleActive = false;
-                this.wobbleIntensity = 0;
-            }
-        });
-    }
 
     /**
      * MIRROR — Notes swap lanes (left↔right) on screen for a duration.
@@ -364,15 +337,7 @@ export default class EventManager {
         });
     }
 
-    /**
-     * Get the wobble X offset for a note at the given song position.
-     */
-    getWobbleOffset(songPosition, noteTime) {
-        if (!this.wobbleActive) return 0;
-        // Sine wave wobble based on time
-        const phase = (songPosition * 0.005) + (noteTime * 0.003);
-        return Math.sin(phase) * this.wobbleIntensity;
-    }
+
 
     /**
      * Get the effective lane X for a note, considering mirror effect.
@@ -387,7 +352,6 @@ export default class EventManager {
             if (effect.cleanup) effect.cleanup();
         }
         this.activeEffects = [];
-        this.wobbleActive = false;
         this.mirrorActive = false;
     }
 }

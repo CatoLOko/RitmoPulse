@@ -212,8 +212,11 @@ export default class GameScene extends Phaser.Scene {
         if (this.cache.audio.exists('current_song')) {
             this.audioSync.playSong('current_song');
         } else {
-            // No audio file — run procedural 8-bit synth version
-            this.audioSync.play8BitVersion(this.noteMgr.notes);
+            // No audio file — run in silent/demo mode
+            this.audioSync.init();
+            this.audioSync.songStartTime = this.audioSync.audioContext.currentTime;
+            this.audioSync.playing = true;
+            this.audioSync.songDuration = 180000;
         }
     }
 
@@ -312,34 +315,6 @@ export default class GameScene extends Phaser.Scene {
      * Handle a key press on a specific lane.
      */
     handleLanePress(lane, songPos) {
-        // Check for bomb note FIRST — hitting a bomb = instant game over!
-        const bomb = this.noteMgr.getBombNote(lane, songPos);
-        if (bomb) {
-            this.noteMgr.hitNote(bomb);
-            this.judgmentPopup.show(lane, 'MISS');
-
-            // Dramatic bomb explosion
-            this.cameras.main.flash(500, 255, 0, 0);
-            this.cameras.main.shake(800, 0.02);
-            this.particleMgr.emitMiss(lane);
-
-            // Show bomb warning
-            const bombText = this.add.text(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2, '💣 BOMBA!', {
-                fontFamily: 'Orbitron', fontSize: '52px', fontStyle: 'bold',
-                color: '#FF0000', stroke: '#000000', strokeThickness: 6,
-            }).setOrigin(0.5).setDepth(200);
-
-            this.tweens.add({
-                targets: bombText,
-                alpha: 0, scaleX: 2, scaleY: 2,
-                duration: 800,
-                onComplete: () => bombText.destroy(),
-            });
-
-            this.endGame(false);
-            return;
-        }
-
         const note = this.noteMgr.getHittableNote(lane, songPos);
 
         if (!note) return;
