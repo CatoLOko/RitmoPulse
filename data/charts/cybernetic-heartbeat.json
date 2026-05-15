@@ -1,0 +1,25 @@
+{
+  "song": "Cybernetic Heartbeat",
+  "bpm": 160,
+  "scrollSpeed": 1.6,
+  "events": [
+    { "time": 2000, "type": "pulseReceptors", "duration": 6000, "interval": 400 },
+    { "time": 8000, "type": "textPopup", "text": "CYBER PUNK", "color": "#00FFFF" }
+  ],
+  "notes": [
+    { "time": 1000, "lane": 0, "type": "tap" },
+    { "time": 1500, "lane": 3, "type": "tap" },
+    { "time": 2000, "lane": 1, "type": "tap" },
+    { "time": 2200, "lane": 2, "type": "tap" },
+    { "time": 2400, "lane": 0, "type": "tap" },
+    { "time": 2600, "lane": 3, "type": "tap" },
+    { "time": 3000, "lane": 1, "type": "sustain", "duration": 1500 },
+    { "time": 5000, "lane": 2, "type": "sustain", "duration": 1500 },
+    { "time": 7000, "lane": 0, "type": "bomb" },
+    { "time": 7000, "lane": 3, "type": "bomb" },
+    { "time": 7500, "lane": 1, "type": "tap" },
+    { "time": 8000, "lane": 2, "type": "tap" },
+    { "time": 8500, "lane": 0, "type": "tap" },
+    { "time": 9000, "lane": 3, "type": "sustain", "duration": 2000 }
+  ]
+}

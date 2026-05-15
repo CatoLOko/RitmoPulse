@@ -152,6 +152,8 @@ export default class SongSelectScene extends Phaser.Scene {
 
         const song = this.songs[this.selectedIndex];
 
+        this.sound.stopAll();
+
         this.cameras.main.fadeOut(400, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.scene.start('Game', { song });

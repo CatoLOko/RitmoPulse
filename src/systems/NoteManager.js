@@ -4,6 +4,7 @@
  * Supports bomb notes and visual modifiers (wobble, mirror).
  */
 import { CONFIG } from '../config.js';
+import settingsManager from './SettingsManager.js';
 
 export default class NoteManager {
     constructor(scene, audioSync) {
@@ -100,6 +101,16 @@ export default class NoteManager {
                 if (noteData.type !== 'bomb') {
                     const angle = [270, 180, 0, 90][effectiveLane];
                     noteData.sprite.angle = angle;
+                }
+
+                // Ghost notes fading effect
+                const ghostEnabled = settingsManager.get('ghostNotes');
+                if (ghostEnabled && noteData.type !== 'bomb') {
+                    const distance = Math.max(0, CONFIG.RECEPTOR_Y - y);
+                    // Fade out completely when 150px away from receptor
+                    noteData.sprite.alpha = Phaser.Math.Clamp((distance - 150) / 200, 0, 1);
+                } else {
+                    noteData.sprite.alpha = 1;
                 }
 
                 // Bomb note pulsing animation

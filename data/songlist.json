@@ -75,5 +75,38 @@
     "chartFile": "data/charts/thunderstruck.json",
     "audioFile": "assets/songs/thunderstruck.mp3",
     "coverArt": "assets/covers/thunderstruck.png"
+  },
+  {
+    "id": "neon-drift",
+    "name": "Neon Drift",
+    "artist": "Project Pulse OST",
+    "bpm": 140,
+    "difficulty": 3,
+    "scrollSpeed": 1.4,
+    "chartFile": "data/charts/neon-drift.json",
+    "audioFile": "assets/songs/neon-drift.mp3",
+    "coverArt": "assets/covers/demo-pulse.png"
+  },
+  {
+    "id": "cybernetic-heartbeat",
+    "name": "Cybernetic Heartbeat",
+    "artist": "Project Pulse OST",
+    "bpm": 160,
+    "difficulty": 4,
+    "scrollSpeed": 1.6,
+    "chartFile": "data/charts/cybernetic-heartbeat.json",
+    "audioFile": "assets/songs/cybernetic-heartbeat.mp3",
+    "coverArt": "assets/covers/demo-pulse.png"
+  },
+  {
+    "id": "quantum-resonance",
+    "name": "Quantum Resonance",
+    "artist": "Project Pulse OST",
+    "bpm": 180,
+    "difficulty": 5,
+    "scrollSpeed": 1.8,
+    "chartFile": "data/charts/quantum-resonance.json",
+    "audioFile": "assets/songs/quantum-resonance.mp3",
+    "coverArt": "assets/covers/demo-pulse.png"
   }
 ]

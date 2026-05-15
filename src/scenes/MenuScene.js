@@ -11,6 +11,17 @@ export default class MenuScene extends Phaser.Scene {
     create() {
         this.cameras.main.fadeIn(500);
 
+        // Play menu music
+        if (this.cache.audio.exists('menu_music')) {
+            let menuMusic = this.sound.get('menu_music');
+            if (!menuMusic) {
+                menuMusic = this.sound.add('menu_music', { loop: true, volume: 0.4 });
+            }
+            if (!menuMusic.isPlaying) {
+                menuMusic.play();
+            }
+        }
+
         // Background
         this.add.image(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2, 'bg_menu');
 

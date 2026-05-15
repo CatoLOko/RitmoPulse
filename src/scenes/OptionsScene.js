@@ -318,59 +318,44 @@ export default class OptionsScene extends Phaser.Scene {
         this.createSlider(c, 150, startY, 'Velocidade das Notas', 'scrollSpeedMultiplier', 0xE74C3C, 0.5, 3.0, 0.1);
 
         // Background effects toggle
-        const effectsY = startY + 100;
-        c.add(this.add.text(150, effectsY, 'Efeitos Visuais', {
-            fontFamily: 'Inter', fontSize: '16px', color: '#888899',
-        }).setOrigin(0, 0.5));
-
-        const effectsOn = settingsManager.get('backgroundEffects');
-        const toggleBg = this.add.rectangle(550, effectsY, 70, 34, effectsOn ? 0x2ECC71 : 0x333355, 1)
-            .setInteractive({ useHandCursor: true }).setStrokeStyle(2, 0x444466);
-        const toggleKnob = this.add.circle(effectsOn ? 575 : 525, effectsY, 13, 0xffffff, 1);
-        const toggleLabel = this.add.text(640, effectsY, effectsOn ? 'ON' : 'OFF', {
-            fontFamily: 'Orbitron', fontSize: '14px', color: effectsOn ? '#2ECC71' : '#666677',
-        }).setOrigin(0, 0.5);
-        c.add(toggleBg);
-        c.add(toggleKnob);
-        c.add(toggleLabel);
-
-        toggleBg.on('pointerdown', () => {
-            const current = settingsManager.get('backgroundEffects');
-            const newVal = !current;
-            settingsManager.set('backgroundEffects', newVal);
-            this.tweens.add({ targets: toggleKnob, x: newVal ? 575 : 525, duration: 150 });
-            toggleBg.setFillStyle(newVal ? 0x2ECC71 : 0x333355);
-            toggleLabel.setText(newVal ? 'ON' : 'OFF').setColor(newVal ? '#2ECC71' : '#666677');
-        });
+        const effectsY = startY + 70;
+        this.createToggle(c, 150, effectsY, 'Efeitos Visuais', 'backgroundEffects');
 
         // FPS counter toggle
-        const fpsY = effectsY + 80;
-        c.add(this.add.text(150, fpsY, 'Contador FPS', {
+        const fpsY = effectsY + 50;
+        this.createToggle(c, 150, fpsY, 'Contador FPS', 'showFPS');
+
+        // Ghost notes toggle
+        const ghostY = fpsY + 50;
+        this.createToggle(c, 150, ghostY, 'Ghost Notes (Invisível)', 'ghostNotes');
+
+        // Game Mode cycle
+        const modeY = ghostY + 60;
+        c.add(this.add.text(150, modeY, 'Modo de Jogo', {
             fontFamily: 'Inter', fontSize: '16px', color: '#888899',
         }).setOrigin(0, 0.5));
 
-        const fpsOn = settingsManager.get('showFPS');
-        const fpsBg = this.add.rectangle(550, fpsY, 70, 34, fpsOn ? 0x2ECC71 : 0x333355, 1)
-            .setInteractive({ useHandCursor: true }).setStrokeStyle(2, 0x444466);
-        const fpsKnob = this.add.circle(fpsOn ? 575 : 525, fpsY, 13, 0xffffff, 1);
-        const fpsLabel = this.add.text(640, fpsY, fpsOn ? 'ON' : 'OFF', {
-            fontFamily: 'Orbitron', fontSize: '14px', color: fpsOn ? '#2ECC71' : '#666677',
-        }).setOrigin(0, 0.5);
-        c.add(fpsBg);
-        c.add(fpsKnob);
-        c.add(fpsLabel);
+        const modes = ['Standard', 'Zen', 'Sudden Death'];
+        let currentMode = settingsManager.get('gameMode');
+        
+        const modeBtn = this.add.rectangle(550, modeY, 140, 34, 0x1a1a2e, 1)
+            .setInteractive({ useHandCursor: true }).setStrokeStyle(2, 0x9B59B6);
+        const modeText = this.add.text(550, modeY, currentMode, {
+            fontFamily: 'Orbitron', fontSize: '14px', color: '#ffffff',
+        }).setOrigin(0.5);
+        c.add(modeBtn);
+        c.add(modeText);
 
-        fpsBg.on('pointerdown', () => {
-            const current = settingsManager.get('showFPS');
-            const newVal = !current;
-            settingsManager.set('showFPS', newVal);
-            this.tweens.add({ targets: fpsKnob, x: newVal ? 575 : 525, duration: 150 });
-            fpsBg.setFillStyle(newVal ? 0x2ECC71 : 0x333355);
-            fpsLabel.setText(newVal ? 'ON' : 'OFF').setColor(newVal ? '#2ECC71' : '#666677');
+        modeBtn.on('pointerdown', () => {
+            let idx = modes.indexOf(currentMode);
+            idx = (idx + 1) % modes.length;
+            currentMode = modes[idx];
+            settingsManager.set('gameMode', currentMode);
+            modeText.setText(currentMode);
         });
 
         // Reset all settings
-        const resetY = fpsY + 100;
+        const resetY = modeY + 80;
         const resetAll = this.add.text(CONFIG.WIDTH / 2, resetY, '↺ RESETAR TUDO', {
             fontFamily: 'Orbitron', fontSize: '16px', color: '#E74C3C',
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -381,5 +366,32 @@ export default class OptionsScene extends Phaser.Scene {
             this.scene.restart();
         });
         c.add(resetAll);
+    }
+
+    createToggle(container, x, y, label, settingKey) {
+        container.add(this.add.text(x, y, label, {
+            fontFamily: 'Inter', fontSize: '16px', color: '#888899',
+        }).setOrigin(0, 0.5));
+
+        const isOn = settingsManager.get(settingKey);
+        const toggleBg = this.add.rectangle(550, y, 70, 34, isOn ? 0x2ECC71 : 0x333355, 1)
+            .setInteractive({ useHandCursor: true }).setStrokeStyle(2, 0x444466);
+        const toggleKnob = this.add.circle(isOn ? 575 : 525, y, 13, 0xffffff, 1);
+        const toggleLabel = this.add.text(600, y, isOn ? 'ON' : 'OFF', {
+            fontFamily: 'Orbitron', fontSize: '14px', color: isOn ? '#2ECC71' : '#666677',
+        }).setOrigin(0, 0.5);
+        
+        container.add(toggleBg);
+        container.add(toggleKnob);
+        container.add(toggleLabel);
+
+        toggleBg.on('pointerdown', () => {
+            const current = settingsManager.get(settingKey);
+            const newVal = !current;
+            settingsManager.set(settingKey, newVal);
+            this.scene.tweens.add({ targets: toggleKnob, x: newVal ? 575 : 525, duration: 150 });
+            toggleBg.setFillStyle(newVal ? 0x2ECC71 : 0x333355);
+            toggleLabel.setText(newVal ? 'ON' : 'OFF').setColor(newVal ? '#2ECC71' : '#666677');
+        });
     }
 }

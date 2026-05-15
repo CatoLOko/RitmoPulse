@@ -30,6 +30,8 @@ const DEFAULTS = {
     scrollSpeedMultiplier: 1.0,  // user multiplier (combined with per-song speed)
     backgroundEffects: true,
     showFPS: false,
+    gameMode: 'Standard', // Standard, Zen, Sudden Death
+    ghostNotes: false,
 };
 
 class SettingsManager {

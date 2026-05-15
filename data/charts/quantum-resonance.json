@@ -1,0 +1,28 @@
+{
+  "song": "Quantum Resonance",
+  "bpm": 180,
+  "scrollSpeed": 1.8,
+  "events": [
+    { "time": 3000, "type": "wobble", "duration": 5000, "intensity": 40 },
+    { "time": 8000, "type": "mirror", "duration": 4000 }
+  ],
+  "notes": [
+    { "time": 1500, "lane": 0, "type": "tap" },
+    { "time": 1750, "lane": 1, "type": "tap" },
+    { "time": 2000, "lane": 2, "type": "tap" },
+    { "time": 2250, "lane": 3, "type": "tap" },
+    { "time": 2500, "lane": 2, "type": "tap" },
+    { "time": 2750, "lane": 1, "type": "tap" },
+    { "time": 3000, "lane": 0, "type": "sustain", "duration": 800 },
+    { "time": 4000, "lane": 3, "type": "sustain", "duration": 800 },
+    { "time": 5000, "lane": 1, "type": "bomb" },
+    { "time": 5250, "lane": 2, "type": "tap" },
+    { "time": 5500, "lane": 0, "type": "bomb" },
+    { "time": 5750, "lane": 3, "type": "tap" },
+    { "time": 6000, "lane": 1, "type": "tap" },
+    { "time": 6250, "lane": 2, "type": "tap" },
+    { "time": 6500, "lane": 1, "type": "tap" },
+    { "time": 6750, "lane": 0, "type": "tap" },
+    { "time": 7000, "lane": 2, "type": "sustain", "duration": 2000 }
+  ]
+}

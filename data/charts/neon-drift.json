@@ -1,0 +1,29 @@
+{
+  "song": "Neon Drift",
+  "bpm": 140,
+  "scrollSpeed": 1.4,
+  "events": [
+    { "time": 1000, "type": "flashBg", "color": "#00FF00", "duration": 500 },
+    { "time": 5000, "type": "wobble", "duration": 4000, "intensity": 30 },
+    { "time": 10000, "type": "mirror", "duration": 5000 }
+  ],
+  "notes": [
+    { "time": 2000, "lane": 0, "type": "tap" },
+    { "time": 2250, "lane": 1, "type": "tap" },
+    { "time": 2500, "lane": 2, "type": "tap" },
+    { "time": 2750, "lane": 3, "type": "tap" },
+    { "time": 3000, "lane": 0, "type": "sustain", "duration": 1000 },
+    { "time": 4500, "lane": 2, "type": "bomb" },
+    { "time": 5000, "lane": 1, "type": "tap" },
+    { "time": 5500, "lane": 3, "type": "tap" },
+    { "time": 6000, "lane": 0, "type": "tap" },
+    { "time": 6500, "lane": 2, "type": "tap" },
+    { "time": 7000, "lane": 1, "type": "sustain", "duration": 1000 },
+    { "time": 8500, "lane": 0, "type": "tap" },
+    { "time": 9000, "lane": 3, "type": "tap" },
+    { "time": 9500, "lane": 1, "type": "bomb" },
+    { "time": 10000, "lane": 2, "type": "tap" },
+    { "time": 10500, "lane": 0, "type": "tap" },
+    { "time": 11000, "lane": 3, "type": "sustain", "duration": 2000 }
+  ]
+}

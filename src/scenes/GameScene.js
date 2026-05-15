@@ -289,8 +289,17 @@ export default class GameScene extends Phaser.Scene {
             this.fpsText.setText(`FPS: ${Math.round(this.game.loop.actualFps)}`);
         }
 
-        // Check for game over (health depleted)
-        if (this.scoreMgr.isDead()) {
+        // Check for game over (health depleted or sudden death)
+        const mode = settingsManager.get('gameMode');
+        let isDead = false;
+        
+        if (mode === 'Sudden Death' && this.scoreMgr.misses > 0) {
+            isDead = true;
+        } else if (mode !== 'Zen' && this.scoreMgr.isDead()) {
+            isDead = true;
+        }
+
+        if (isDead) {
             this.endGame(false);
         }
 
