@@ -82,18 +82,77 @@ export default class AudioSyncManager {
         return !this.currentSound.isPlaying && this.getSongPosition() > 1000;
     }
 
+    play8BitVersion(notes) {
+        this.init();
+        
+        if (this.currentSound) {
+            this.currentSound.stop();
+            this.currentSound.destroy();
+            this.currentSound = null;
+        }
+
+        this.songStartTime = this.audioContext.currentTime;
+        
+        // Find last note time for duration
+        let maxTime = 0;
+        notes.forEach(n => {
+            const end = n.time + (n.duration || 0);
+            if (end > maxTime) maxTime = end;
+        });
+        this.songDuration = maxTime + 3000;
+        
+        this.playing = true;
+        this.paused = false;
+        this.synthNodes = [];
+
+        // Base frequencies for 8-bit tracks (Pentatonic scale or similar)
+        const freqs = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+        const vol = settingsManager.get('musicVolume') * settingsManager.get('masterVolume') * 0.15; // Lower volume for square waves
+
+        notes.forEach(note => {
+            if (note.type === 'bomb') return;
+            
+            const timeInSeconds = note.time / 1000;
+            const startTime = this.songStartTime + timeInSeconds;
+            const duration = (note.type === 'sustain' && note.duration > 0) ? (note.duration / 1000) : 0.15;
+            
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'square'; // 8-bit sound
+            osc.frequency.value = freqs[note.lane];
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(vol, startTime + 0.02);
+            gain.gain.setValueAtTime(vol, startTime + duration - 0.02);
+            gain.gain.linearRampToValueAtTime(0, startTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+            
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+            
+            this.synthNodes.push(osc);
+        });
+    }
+
     pause() {
         if (this.playing && !this.paused) {
             this.pauseTime = this.getSongPosition();
             this.paused = true;
             if (this.currentSound) this.currentSound.pause();
+            if (this.audioContext.state === 'running') this.audioContext.suspend();
         }
     }
 
     resume() {
         if (this.playing && this.paused) {
             if (this.currentSound) this.currentSound.resume();
-            this.songStartTime = this.audioContext.currentTime - (this.pauseTime - this.offset) / 1000;
+            if (this.audioContext.state === 'suspended') this.audioContext.resume();
+            
+            // Adjust songStartTime based on how long we were paused
+            const currentCtxTime = this.audioContext.currentTime;
+            this.songStartTime = currentCtxTime - (this.pauseTime - this.offset) / 1000;
             this.paused = false;
         }
     }
@@ -103,6 +162,15 @@ export default class AudioSyncManager {
             this.currentSound.stop();
             this.currentSound.destroy();
             this.currentSound = null;
+        }
+        if (this.synthNodes) {
+            this.synthNodes.forEach(osc => {
+                try { osc.stop(); osc.disconnect(); } catch (e) {}
+            });
+            this.synthNodes = [];
+        }
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
         }
         this.playing = false;
         this.paused = false;

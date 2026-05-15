@@ -212,11 +212,8 @@ export default class GameScene extends Phaser.Scene {
         if (this.cache.audio.exists('current_song')) {
             this.audioSync.playSong('current_song');
         } else {
-            // No audio file — run in silent/demo mode
-            this.audioSync.init();
-            this.audioSync.songStartTime = this.audioSync.audioContext.currentTime;
-            this.audioSync.playing = true;
-            this.audioSync.songDuration = 180000;
+            // No audio file — run procedural 8-bit synth version
+            this.audioSync.play8BitVersion(this.noteMgr.notes);
         }
     }
 

@@ -134,7 +134,10 @@ export default class NoteManager {
             }
 
             // Recycle if way past the receptor and not hit
-            if (y > CONFIG.HEIGHT + 100) {
+            const endTime = noteData.time + (noteData.duration || 0);
+            const endY = this.audioSync.getNoteY(endTime);
+
+            if (endY > CONFIG.HEIGHT + 100) {
                 if (!noteData.hit && !noteData.missed) {
                     noteData.missed = true;
                 }
@@ -251,8 +254,8 @@ export default class NoteManager {
         let closestDiff = Infinity;
 
         for (const noteData of this.activeNotes) {
-            // Check against original lane (input lane)
-            if (noteData.lane !== lane || noteData.hit || noteData.missed) continue;
+            const effectiveLane = this.getEffectiveLane(noteData.lane);
+            if (effectiveLane !== lane || noteData.hit || noteData.missed) continue;
 
             const diff = Math.abs(noteData.time - songPosition);
             if (diff <= CONFIG.JUDGE_MISS && diff < closestDiff) {
@@ -270,7 +273,8 @@ export default class NoteManager {
     getBombNote(lane, songPosition) {
         for (const noteData of this.activeNotes) {
             if (noteData.type !== 'bomb') continue;
-            if (noteData.lane !== lane || noteData.hit || noteData.missed) continue;
+            const effectiveLane = this.getEffectiveLane(noteData.lane);
+            if (effectiveLane !== lane || noteData.hit || noteData.missed) continue;
 
             const diff = Math.abs(noteData.time - songPosition);
             if (diff <= CONFIG.JUDGE_MISS) {
