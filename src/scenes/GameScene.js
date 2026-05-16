@@ -35,6 +35,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.events.once('shutdown', this.shutdown, this);
         this.cameras.main.fadeIn(300);
 
         // Background
@@ -431,5 +432,11 @@ export default class GameScene extends Phaser.Scene {
         if (this.noteMgr) this.noteMgr.destroy();
         if (this.eventMgr) this.eventMgr.destroy();
         if (this.hud) this.hud.destroy();
+
+        // Clear cache to prevent audio cross-contamination between songs
+        if (this.songData) {
+            this.cache.audio.remove(this.songData.id + '_audio');
+            this.cache.json.remove(this.songData.id + '_chart');
+        }
     }
 }

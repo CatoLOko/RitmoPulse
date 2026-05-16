@@ -40,7 +40,7 @@
     "difficulty": 4,
     "scrollSpeed": 1.4,
     "chartFile": "data/charts/justice-for-all.json",
-    "audioFile": "assets/songs/justice-for-all.mp3",
+    "audioFile": "assets/songs/_And Justice for All (Remastered).mp3",
     "coverArt": "assets/covers/justice-for-all.png"
   },
   {
@@ -53,5 +53,49 @@
     "chartFile": "data/charts/thunderstruck.json",
     "audioFile": "assets/songs/Thunderstruck.mp3",
     "coverArt": "assets/covers/thunderstruck.png"
+  },
+  {
+    "id": "acid-rain",
+    "name": "Acid Rain",
+    "artist": "Avenged Sevenfold",
+    "bpm": 132,
+    "difficulty": 4,
+    "scrollSpeed": 1.5,
+    "chartFile": "data/charts/acid-rain.json",
+    "audioFile": "assets/songs/Acid Rain AvengedSeveFold.mp3",
+    "coverArt": "assets/covers/acid-rain.png"
+  },
+  {
+    "id": "hail-to-the-king",
+    "name": "Hail To The King",
+    "artist": "Avenged Sevenfold",
+    "bpm": 118,
+    "difficulty": 4,
+    "scrollSpeed": 1.5,
+    "chartFile": "data/charts/hail-to-the-king.json",
+    "audioFile": "assets/songs/Avenged Sevenfold - Hail To The King [Official Music Video].mp3",
+    "coverArt": "assets/covers/hail-to-the-king.png"
+  },
+  {
+    "id": "the-unforgiven-ii",
+    "name": "The Unforgiven II",
+    "artist": "Metallica",
+    "bpm": 85,
+    "difficulty": 3,
+    "scrollSpeed": 1.2,
+    "chartFile": "data/charts/the-unforgiven-ii.json",
+    "audioFile": "assets/songs/Metallica_ The Unforgiven II (Official Music Video).mp3",
+    "coverArt": "assets/covers/the-unforgiven-ii.png"
+  },
+  {
+    "id": "to-live-is-to-die",
+    "name": "To Live Is to Die",
+    "artist": "Metallica",
+    "bpm": 107,
+    "difficulty": 5,
+    "scrollSpeed": 1.6,
+    "chartFile": "data/charts/to-live-is-to-die.json",
+    "audioFile": "assets/songs/To Live Is to Die (Remastered).mp3",
+    "coverArt": "assets/covers/to-live-is-to-die.png"
   }
 ]
