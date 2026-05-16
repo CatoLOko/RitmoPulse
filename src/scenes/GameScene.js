@@ -26,11 +26,11 @@ export default class GameScene extends Phaser.Scene {
     preload() {
         // Load the chart JSON
         if (this.songData && this.songData.chartFile) {
-            this.load.json('current_chart', this.songData.chartFile);
+            this.load.json(this.songData.id + '_chart', this.songData.chartFile);
         }
         // Load the audio file
         if (this.songData && this.songData.audioFile) {
-            this.load.audio('current_song', this.songData.audioFile);
+            this.load.audio(this.songData.id + '_audio', this.songData.audioFile);
         }
     }
 
@@ -70,7 +70,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // Load chart and events
-        const chartData = this.cache.json.get('current_chart');
+        const chartData = this.cache.json.get(this.songData ? this.songData.id + '_chart' : 'current_chart');
         if (chartData) {
             this.noteMgr.loadChart(chartData);
             this.eventMgr.loadEvents(chartData);
@@ -209,8 +209,10 @@ export default class GameScene extends Phaser.Scene {
     startSong() {
         this.gameStarted = true;
 
-        if (this.cache.audio.exists('current_song')) {
-            this.audioSync.playSong('current_song');
+        const audioKey = this.songData ? this.songData.id + '_audio' : 'current_song';
+
+        if (this.cache.audio.exists(audioKey)) {
+            this.audioSync.playSong(audioKey);
         } else {
             // No audio file — run in silent/demo mode
             this.audioSync.init();
