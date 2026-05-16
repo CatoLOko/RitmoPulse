@@ -27,6 +27,8 @@ export default class SongSelectScene extends Phaser.Scene {
         this.selectedIndex = 0;
         this.songCards = [];
 
+        this.songsContainer = this.add.container(0, 0);
+
         // Build song cards
         const startY = 100;
         const cardHeight = 80;
@@ -41,6 +43,7 @@ export default class SongSelectScene extends Phaser.Scene {
         // Selection highlight
         this.selectionBg = this.add.rectangle(CONFIG.WIDTH / 2, 0, CONFIG.WIDTH - 100, cardHeight, 0x9B59B6, 0.08)
             .setDepth(0);
+        this.songsContainer.add(this.selectionBg);
 
         this.updateSelection();
 
@@ -103,6 +106,8 @@ export default class SongSelectScene extends Phaser.Scene {
         // Divider line
         const divider = this.add.rectangle(x, y + 40, CONFIG.WIDTH - 140, 1, 0x222244, 0.4).setDepth(3);
 
+        this.songsContainer.add([nameText, artistText, bpmText, diffText, speedText, divider]);
+
         return { nameText, artistText, bpmText, diffText, speedText, divider, y };
     }
 
@@ -144,6 +149,18 @@ export default class SongSelectScene extends Phaser.Scene {
                 card.nameText.setFontSize('20px');
                 card.nameText.setScale(1);
             }
+        });
+
+        // Scroll the container to keep selected item near the top
+        const cardHeight = 80;
+        const cardGap = 6;
+        const targetY = -(this.selectedIndex * (cardHeight + cardGap));
+
+        this.tweens.add({
+            targets: this.songsContainer,
+            y: targetY,
+            duration: 200,
+            ease: 'Cubic.easeOut'
         });
     }
 
