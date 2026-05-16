@@ -1,7 +1,7 @@
 /**
  * NoteManager — Loads chart data, spawns/positions/recycles note sprites.
  * Notes scroll DOWNWARD. Position is always derived from AudioSyncManager.
- * Supports bomb notes and visual modifiers (wobble, mirror).
+ * Supports bomb notes and visual modifiers.
  */
 import { CONFIG } from '../config.js';
 import settingsManager from './SettingsManager.js';
@@ -25,7 +25,7 @@ export default class NoteManager {
         // Pixels per millisecond (base, may change with dynamic scroll)
         this.pxPerMs = CONFIG.RECEPTOR_Y / CONFIG.SCROLL_TIME;
 
-        // Reference to EventManager for wobble/mirror effects
+        // Reference to EventManager for effects
         this.eventMgr = null;
     }
 
@@ -87,15 +87,14 @@ export default class NoteManager {
             if (noteData.sprite && !noteData.sprite.destroyed) {
                 noteData.sprite.y = y;
 
-                // Apply wobble + mirror effects
-                const effectiveLane = this.getEffectiveLane(noteData.lane);
-                let x = CONFIG.LANE_CENTERS[effectiveLane];
+                // Apply positioning
+                let x = CONFIG.LANE_CENTERS[noteData.lane];
 
                 noteData.sprite.x = x;
 
                 // Rotation for lane direction (bomb notes don't rotate)
                 if (noteData.type !== 'bomb') {
-                    const angle = [270, 180, 0, 90][effectiveLane];
+                    const angle = [270, 180, 0, 90][noteData.lane];
                     noteData.sprite.angle = angle;
                 }
 
@@ -130,26 +129,15 @@ export default class NoteManager {
     }
 
     /**
-     * Get the effective lane, considering mirror effect.
-     */
-    getEffectiveLane(lane) {
-        if (this.eventMgr && this.eventMgr.mirrorActive) {
-            return CONFIG.LANE_COUNT - 1 - lane;
-        }
-        return lane;
-    }
-
-    /**
      * Spawn a note sprite.
      */
     spawnNote(noteData) {
-        const effectiveLane = this.getEffectiveLane(noteData.lane);
-        const x = CONFIG.LANE_CENTERS[effectiveLane];
+        const x = CONFIG.LANE_CENTERS[noteData.lane];
         const y = this.audioSync.getNoteY(noteData.time);
 
         let sprite;
-        const angle = [270, 180, 0, 90][effectiveLane];
-        sprite = this.scene.add.image(x, y, `note_${effectiveLane}`);
+        const angle = [270, 180, 0, 90][noteData.lane];
+        sprite = this.scene.add.image(x, y, `note_${noteData.lane}`);
         sprite.setAngle(angle);
         sprite.setDepth(10);
 
@@ -168,18 +156,17 @@ export default class NoteManager {
      * Create sustain note visual (body + cap extending ABOVE the note head).
      */
     createSustainVisual(noteData) {
-        const effectiveLane = this.getEffectiveLane(noteData.lane);
-        const x = CONFIG.LANE_CENTERS[effectiveLane];
+        const x = CONFIG.LANE_CENTERS[noteData.lane];
         const totalHeight = noteData.duration * this.pxPerMs;
 
         const container = this.scene.add.container(x, 0);
         container.setDepth(5);
 
-        const body = this.scene.add.tileSprite(0, 0, CONFIG.SUSTAIN_WIDTH, totalHeight, `sustain_body_${effectiveLane}`);
+        const body = this.scene.add.tileSprite(0, 0, CONFIG.SUSTAIN_WIDTH, totalHeight, `sustain_body_${noteData.lane}`);
         body.setOrigin(0.5, 1);
         container.add(body);
 
-        const cap = this.scene.add.image(0, -totalHeight, `sustain_cap_${effectiveLane}`);
+        const cap = this.scene.add.image(0, -totalHeight, `sustain_cap_${noteData.lane}`);
         cap.setOrigin(0.5, 1);
         container.add(cap);
 
@@ -195,8 +182,7 @@ export default class NoteManager {
         if (!ss || !ss.container || ss.container.destroyed) return;
 
         const noteY = this.audioSync.getNoteY(noteData.time);
-        const effectiveLane = this.getEffectiveLane(noteData.lane);
-        let x = CONFIG.LANE_CENTERS[effectiveLane];
+        let x = CONFIG.LANE_CENTERS[noteData.lane];
 
         if (noteData.holdActive) {
             const endTime = noteData.time + noteData.duration;
@@ -226,8 +212,7 @@ export default class NoteManager {
         let closestDiff = Infinity;
 
         for (const noteData of this.activeNotes) {
-            const effectiveLane = this.getEffectiveLane(noteData.lane);
-            if (effectiveLane !== lane || noteData.hit || noteData.missed) continue;
+            if (noteData.lane !== lane || noteData.hit || noteData.missed) continue;
 
             const diff = Math.abs(noteData.time - songPosition);
             if (diff <= CONFIG.JUDGE_MISS && diff < closestDiff) {

@@ -12,7 +12,7 @@ export default class BootScene extends Phaser.Scene {
     preload() {
         // Load chart & song data
         this.load.json('songlist', 'data/songlist.json');
-        this.load.audio('menu_music', 'assets/songs/menu_music.mp3');
+        this.load.audio('menu_music', 'assets/songs/Midnight City.mp3');
     }
 
     create() {

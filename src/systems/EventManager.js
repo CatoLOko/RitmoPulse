@@ -20,7 +20,6 @@ export default class EventManager {
         this.enabled = settingsManager.get('backgroundEffects');
 
         // Active modifiers
-        this.mirrorActive = false;
     }
 
     /**
@@ -32,7 +31,6 @@ export default class EventManager {
             .sort((a, b) => a.time - b.time);
         this.nextEventIndex = 0;
         this.activeEffects = [];
-        this.mirrorActive = false;
     }
 
     /**
@@ -100,9 +98,6 @@ export default class EventManager {
                 break;
             case 'pulseReceptors':
                 this.doPulseReceptors(evt);
-                break;
-            case 'mirror':
-                this.doMirror(evt);
                 break;
         }
     }
@@ -313,45 +308,10 @@ export default class EventManager {
 
 
 
-    /**
-     * MIRROR — Notes swap lanes (left↔right) on screen for a duration.
-     * The NoteManager reads mirrorActive to flip note positions.
-     */
-    doMirror(evt) {
-        const duration = evt.duration || 6000;
-
-        this.mirrorActive = true;
-
-        // Show warning text
-        this.doTextPopup({ text: '🪞 MIRROR!', color: '#00D4FF' });
-
-        // Visual feedback — tint receptors
-        this.receptors.forEach(r => r.setTint(0x00D4FF));
-
-        this.activeEffects.push({
-            endTime: this.scene.audioSync.getSongPosition() + duration,
-            cleanup: () => {
-                this.mirrorActive = false;
-                this.receptors.forEach(r => r.clearTint());
-            }
-        });
-    }
-
-
-
-    /**
-     * Get the effective lane X for a note, considering mirror effect.
-     */
-    getMirroredLane(lane) {
-        if (!this.mirrorActive) return lane;
-        return CONFIG.LANE_COUNT - 1 - lane; // 0↔3, 1↔2
-    }
-
     destroy() {
         for (const effect of this.activeEffects) {
             if (effect.cleanup) effect.cleanup();
         }
         this.activeEffects = [];
-        this.mirrorActive = false;
     }
 }

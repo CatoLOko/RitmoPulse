@@ -304,10 +304,15 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // Check for song completion
-        if (this.audioSync.isFinished() || this.noteMgr.isChartComplete(songPos)) {
-            if (songPos > 2000) {
-                this.endGame(true);
-            }
+        let shouldEnd = false;
+        if (this.audioSync.currentSound) {
+            shouldEnd = this.audioSync.isFinished();
+        } else {
+            shouldEnd = this.noteMgr.isChartComplete(songPos);
+        }
+
+        if (shouldEnd && songPos > 2000) {
+            this.endGame(true);
         }
     }
 
