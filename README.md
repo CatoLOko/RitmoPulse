@@ -1,6 +1,6 @@
 # 🎸 Project Pulse — Rhythm Game
 
-A 2D browser-based rhythm game inspired by **Guitar Hero** and **Friday Night Funkin'**, built with [Phaser 3](https://phaser.io/).
+A 2D browser-based rhythm game inspired by **Guitar Hero** and **Rift of the Necrodancer**, built with [Phaser 3](https://phaser.io/).
 
 ## 🎮 Play
 
