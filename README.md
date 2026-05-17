@@ -4,7 +4,7 @@ A 2D browser-based rhythm game inspired by **Guitar Hero** and **Rift of the Nec
 
 ## 🎮 Play
 
-👉 **[Play on GitHub Pages](https://sl101.github.io/RitmoPulse/)** *(update URL after enabling Pages)*
+👉 **[Play on GitHub Pages](https://catoloko.github.io/RitmoPulse/)**
 
 ## ✨ Features
 
